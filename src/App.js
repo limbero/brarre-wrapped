@@ -1,29 +1,9 @@
 import { useEffect, useState } from 'react';
-
-function countOccurrences(arr) {
-  return arr.reduce(function (a, b) {
-    a[b] = a[b] + 1 || 1
-    return a;
-  }, {});
-}
-
-function minutesToHM(d) {
-  const h = Math.floor(d / 60);
-  const m = Math.floor(d % 60);
-
-  const hDisplay = h > 0 ? h + (h === 1 ? " timme" : " timmar") : "";
-  const mDisplay = m > 0 ? (h > 0 ? " och " : "") + m + (m === 1 ? " minut" : " minuter") : "";
-  return hDisplay + mDisplay;
-}
-
-function dupeListToTopList(list, size = 5) {
-  return Object.entries(countOccurrences(list))
-    .map(([k, v]) => ({ thing: k, occurences: v }))
-    .sort((a, b) => a.occurences > b.occurences ? -1 : 1)
-    .slice(0, size);
-}
+import styled from 'styled-components';
+import Confetti from 'react-confetti';
 
 const API_URL = "https://boardgamegeek.com/xmlapi2";
+
 function App() {
   const [plays, setPlays] = useState(null);
   const [games, setGames] = useState(null);
@@ -147,9 +127,11 @@ function App() {
   });
 
   return (
-    <div className="App">
-      (
+    <StyledApp>
+      <Confetti style={{position: "fixed"}}/>
+      <Title>Bräpped 2023</Title>
       <select
+        style={{ fontSize: "2em" }}
         value={player.username}
         onChange={e => {
           setPlayer(uniquePlayers.filter(player => player.username === e.target.value)[0]);
@@ -162,14 +144,22 @@ function App() {
           ))
         }
       </select>
-      )
       {player ? (<>
-        <section>
-          <p>Du har vart med på {myDates.length} brärrkvällar/dagar i år</p>
-          <p>Ni klämde in {myPlays.length} omgångar av {myGames.length} olika spel</p>
-          <p>Du vann {(playerWins[player.username] || 0) < 5 ? "bara " : ""}{playerWins[player.username] || 0} gånger{(playerWins[player.username] || 0) < 5 ? " :(" : " :)"}</p>
-        </section>
-        <section>
+        <Card>
+          <p>Du har vart med på <strong>{myDates.length}</strong> brärrkvällar/dagar i år</p>
+          <p>Ni klämde in <strong>{myPlays.length}</strong> omgångar av <strong>{myGames.length}</strong> olika spel</p>
+          <p>Du vann {(playerWins[player.username] || 0) < 5 ? "bara " : ""}<strong>{playerWins[player.username] || 0}</strong> gånger{(playerWins[player.username] || 0) < 5 ? " :(" : " :)"}</p>
+        </Card>
+        <ImgCard>
+          <img
+            style={{
+              width: "min(80vw, 600px)",
+              verticalAlign: "middle",
+            }}
+            src={gamesMetaDataByName[mostPlayedGames[0].thing].image}
+          />
+        </ImgCard>
+        <Card>
           <p>Dina mest spelade spel är:</p>
           <ol>
             {
@@ -178,14 +168,32 @@ function App() {
               ))
             }
           </ol>
-        </section>
-        <section>
-          <p>Ditt längsta brärr var en omgång {longestGame.name} som höll på i {minutesToHM(longestGame.length)}!</p>
-          <p>Nyaste spelet var: {newestGame.name} ({newestGame.yearPublished})</p>
-          <p>Äldst: {oldestGame.name} ({oldestGame.yearPublished})</p>
-        </section>
-        <section>
-          <p>Du har spelat flest spel designade av:</p>
+        </Card>
+        <ImgCard>
+          <img
+            style={{
+              width: "min(80vw, 600px)",
+              verticalAlign: "middle",
+            }}
+            src={gamesMetaDataByName[longestGame.name].image}
+          />
+        </ImgCard>
+        <Card>
+          <p>Ditt längsta brärr var en omgång <strong>{longestGame.name}</strong> som höll på i <strong>{minutesToHM(longestGame.length)}</strong>!</p>
+          <p>Nyaste spelet var: <strong>{newestGame.name}</strong> ({newestGame.yearPublished})</p>
+          <p>Äldst: <strong>{oldestGame.name}</strong> ({oldestGame.yearPublished})</p>
+        </Card>
+        <ImgCard>
+          <img
+            style={{
+              width: "min(80vw, 600px)",
+              verticalAlign: "middle",
+            }}
+            src={gamesMetaDataByName[newestGame.name].image}
+          />
+        </ImgCard>
+        <Card>
+          <p>Favoritdesigners</p>
           <ol>
             {
               topDesigners.map(x => (
@@ -193,9 +201,18 @@ function App() {
               ))
             }
           </ol>
-        </section>
-        <section>
-          <p>Konstnärer i topp:</p>
+        </Card>
+        <ImgCard>
+          <img
+            style={{
+              width: "min(80vw, 600px)",
+              verticalAlign: "middle",
+            }}
+            src={myGamesWithMetadata.find(game => game.designers.includes(topDesigners[0].thing)).image}
+          />
+        </ImgCard>
+        <Card>
+          <p>Du gillar när de här ritar skiten</p>
           <ol>
             {
               topArtists.map(x => (
@@ -203,9 +220,18 @@ function App() {
               ))
             }
           </ol>
-        </section>
-        <section>
-          <p>Spelmechanics:</p>
+        </Card>
+        <ImgCard>
+          <img
+            style={{
+              width: "min(80vw, 600px)",
+              verticalAlign: "middle",
+            }}
+            src={myGamesWithMetadata.find(game => game.artists.includes(topArtists[0].thing)).image}
+          />
+        </ImgCard>
+        <Card>
+          <p>Mechanics du inte fick nog av</p>
           <ol>
             {
               topMechanics.map(x => (
@@ -213,10 +239,83 @@ function App() {
               ))
             }
           </ol>
-        </section>
+        </Card>
+        <ImgCard>
+          <img
+            style={{
+              width: "min(80vw, 600px)",
+              verticalAlign: "middle",
+            }}
+            src={myGamesWithMetadata.find(game => game.mechanics.includes(topMechanics[0].thing)).image}
+          />
+        </ImgCard>
       </>) : null}
-    </div>
+    </StyledApp>
   );
+}
+
+const StyledApp = styled.div`
+  font-family: sans-serif;
+  text-align: center;
+
+  padding: 50px;
+  background-color: #222;
+  min-height: 100vh;
+`;
+
+const Title = styled.h1`
+  font-weight: 900;
+  letter-spacing: -8px;
+  font-size: 6rem;
+  color: #FFF;
+`;
+
+const Card = styled.section`
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 50px;
+  width: min(80vw, 600px);
+  border-radius: 10px;
+
+  margin: 50px auto;
+
+  background-color: #FFF;
+  text-align: left;
+  font-size: 1.5em;
+
+  & :first-child {
+    margin-top: 0;
+  }
+  & :last-child {
+    margin-bottom: 0;
+  }
+`;
+const ImgCard = styled(Card)`
+  padding: 0 !important;
+`;
+
+function countOccurrences(arr) {
+  return arr.reduce(function (a, b) {
+    a[b] = a[b] + 1 || 1
+    return a;
+  }, {});
+}
+
+function minutesToHM(d) {
+  const h = Math.floor(d / 60);
+  const m = Math.floor(d % 60);
+
+  const hDisplay = h > 0 ? h + (h === 1 ? " timme" : " timmar") : "";
+  const mDisplay = m > 0 ? (h > 0 ? " och " : "") + m + (m === 1 ? " minut" : " minuter") : "";
+  return hDisplay + mDisplay;
+}
+
+function dupeListToTopList(list, size = 5) {
+  return Object.entries(countOccurrences(list))
+    .map(([k, v]) => ({ thing: k, occurences: v }))
+    .sort((a, b) => a.occurences > b.occurences ? -1 : 1)
+    .slice(0, size);
 }
 
 export default App;
