@@ -115,6 +115,8 @@ function App() {
   const oldestGame = gamesChronological[0];
   const newestGame = gamesChronological.at(-1);
 
+  const winPercentage = `${(100*(playerWins[player.username]/myPlays.length)).toFixed(2)}%`;
+
   const longestGame = {
     name: "",
     length: 0,
@@ -148,7 +150,10 @@ function App() {
         <Card>
           <p>Du har vart med på <strong>{myDates.length}</strong> brärrkvällar/dagar i år</p>
           <p>Ni klämde in <strong>{myPlays.length}</strong> omgångar av <strong>{myGames.length}</strong> olika spel</p>
-          <p>Du vann {(playerWins[player.username] || 0) < 5 ? "bara " : ""}<strong>{playerWins[player.username] || 0}</strong> gånger{(playerWins[player.username] || 0) < 5 ? " :(" : " :)"}</p>
+          <p>
+            Du vann {(playerWins[player.username] || 0) < 5 ? "bara " : ""}<strong>{playerWins[player.username] || 0}</strong>
+            &nbsp;gånger (<strong>{winPercentage}</strong>){(playerWins[player.username] || 0) < 5 ? " :(" : " :)"}
+          </p>
         </Card>
         <ImgCard>
           <img
