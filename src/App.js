@@ -115,7 +115,7 @@ function App() {
   const oldestGame = gamesChronological[0];
   const newestGame = gamesChronological.at(-1);
 
-  const winPercentage = `${(100*(playerWins[player.username]/myPlays.length)).toFixed(2)}%`;
+  const winPercentage = `${(100*((playerWins[player.username]|| 0)/myPlays.length)).toFixed(1)}%`;
 
   const longestGame = {
     name: "",
