@@ -25,7 +25,7 @@ function App() {
 
   useEffect(() => {
     if (window.DOMParser) {
-      fetch(API_URL + "/plays\?username\=wohlfart\&mindate\=2023-01-01&maxdate\=2023-12-31")
+      fetch(API_URL + "/plays?username=wohlfart&mindate=2023-01-01&maxdate=2023-12-31")
         .then(response => response.text())
         .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
         .then(data => {
@@ -177,6 +177,7 @@ function App() {
               width: "min(80vw, 600px)",
               verticalAlign: "middle",
             }}
+            alt={mostPlayedGames[0].thing}
             src={gamesMetaDataByName[mostPlayedGames[0].thing].image}
           />
         </ImgCard>
@@ -196,6 +197,7 @@ function App() {
               width: "min(80vw, 600px)",
               verticalAlign: "middle",
             }}
+            alt={longestGame.name}
             src={gamesMetaDataByName[longestGame.name].image}
           />
         </ImgCard>
@@ -210,6 +212,7 @@ function App() {
               width: "min(80vw, 600px)",
               verticalAlign: "middle",
             }}
+            alt={newestGame.name}
             src={gamesMetaDataByName[newestGame.name].image}
           />
         </ImgCard>
@@ -229,6 +232,7 @@ function App() {
               width: "min(80vw, 600px)",
               verticalAlign: "middle",
             }}
+            alt={myGamesWithMetadata.find(game => game.designers.includes(topDesigners[0].thing)).name}
             src={myGamesWithMetadata.find(game => game.designers.includes(topDesigners[0].thing)).image}
           />
         </ImgCard>
@@ -248,6 +252,7 @@ function App() {
               width: "min(80vw, 600px)",
               verticalAlign: "middle",
             }}
+            alt={myGamesWithMetadata.find(game => game.artists.includes(topArtists[0].thing)).name}
             src={myGamesWithMetadata.find(game => game.artists.includes(topArtists[0].thing)).image}
           />
         </ImgCard>
@@ -267,6 +272,7 @@ function App() {
               width: "min(80vw, 600px)",
               verticalAlign: "middle",
             }}
+            alt={myGamesWithMetadata.find(game => game.mechanics.includes(topMechanics[0].thing)).name}
             src={myGamesWithMetadata.find(game => game.mechanics.includes(topMechanics[0].thing)).image}
           />
         </ImgCard>
