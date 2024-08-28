@@ -4,6 +4,20 @@ import Confetti from 'react-confetti';
 
 const API_URL = "https://boardgamegeek.com/xmlapi2";
 
+function chunk(arr, chunkSize) {
+  return arr.reduce((acc, cur) => {
+    if (acc.length === 0) {
+      return [[cur]];
+    }
+    if (acc[acc.length - 1].length === chunkSize) {
+      return [...acc, [cur]];
+    }
+    const head = acc.slice(0, acc.length - 1);
+    const tail = [...acc[acc.length - 1], cur];
+    return [...head, tail];
+  }, []);
+}
+
 function App() {
   const [plays, setPlays] = useState(null);
   const [games, setGames] = useState(null);
@@ -16,13 +30,15 @@ function App() {
         .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
         .then(data => {
           setPlays(data);
-          const gameIds = Array.from(new Set(Array.from(data.querySelectorAll("item")).map(item => item.getAttribute("objectid")))).join(",");
-          fetch(API_URL + "/things?id=" + gameIds)
-            .then(response => response.text())
-            .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
-            .then(gamesData => {
-              setGames(gamesData);
-            });
+          const gameIds = Array.from(new Set(Array.from(data.querySelectorAll("item")).map(item => item.getAttribute("objectid"))));
+          const chunkedGameIds = chunk(gameIds, 20);
+          Promise.all(chunkedGameIds.map(gameIdsChunk =>
+            fetch(API_URL + "/things?id=" + gameIdsChunk.join(","))
+              .then(response => response.text())
+              .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
+          )).then(gamesData => {
+            setGames(gamesData.map(gamesDataChunk => Array.from(gamesDataChunk.querySelectorAll("item"))).flat());
+          });
         });
     }
   }, []);
@@ -67,7 +83,7 @@ function App() {
   const gamesJson = [];
   const gamesMetaDataById = {};
   const gamesMetaDataByName = {};
-  Array.from(games.querySelectorAll("item")).forEach(item => {
+  games.forEach(item => {
     const name = item.querySelector('name[type="primary"]').getAttribute("value");
     const itemAsJson = {
       thumbnail: item.querySelector("thumbnail").innerHTML,
@@ -115,7 +131,7 @@ function App() {
   const oldestGame = gamesChronological[0];
   const newestGame = gamesChronological.at(-1);
 
-  const winPercentage = `${(100*((playerWins[player.username]|| 0)/myPlays.length)).toFixed(1)}%`;
+  const winPercentage = `${(100 * ((playerWins[player.username] || 0) / myPlays.length)).toFixed(1)}%`;
 
   const longestGame = {
     name: "",
@@ -130,7 +146,7 @@ function App() {
 
   return (
     <StyledApp>
-      <Confetti style={{position: "fixed"}}/>
+      <Confetti style={{ position: "fixed" }} />
       <Title>Bräpped 2023</Title>
       <select
         style={{ fontSize: "2em" }}
