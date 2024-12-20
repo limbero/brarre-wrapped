@@ -1,40 +1,31 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Confetti from 'react-confetti';
-import { useBggForYear } from './Data';
+import { dupeListToTopList, minutesToHM, useBggForYear } from './Data';
 
 function App2023() {
   const year = "2023";
+  const [player, setPlayer] = useState("");
   const {
     isLoading,
-    plays,
     gamesMetaDataByName,
-  } = useBggForYear(year);
+    uniquePlayers,
+    myPlays,
+    myGames,
+    myGamesWithMetadata,
+    myDates,
+    mostPlayedGames,
+    playerWins,
+    winPercentage,
+  } = useBggForYear(year, player);
+
   useEffect(() => {
     document.title = `Bräpped ${year}`;
   }, [year]);
-  const [player, setPlayer] = useState("");
 
   if (isLoading) {
     return null;
   }
-
-  const playersWithWins = plays.flatMap(gamePlay => gamePlay.players);
-  const playerWins = countOccurrences(playersWithWins.filter(pl => pl.win).map(pl => pl.username));
-  const uniquePlayers = Array.from(new Set(playersWithWins.map(pl => {
-    const clonedPlayer = structuredClone(pl);
-    delete clonedPlayer.win;
-    return JSON.stringify(clonedPlayer);
-  }))).map(pl => JSON.parse(pl)).sort((a, b) => a.name > b.name ? 1 : -1);
-
-  const myPlays = plays.filter(gamePlay => gamePlay.players.find(pl => pl.username === player.username));
-
-  const myGamesWithDupes = myPlays.map(gamePlay => gamePlay.game);
-  const myGames = Array.from(new Set(myGamesWithDupes.map(game => game.name)));
-  const myGamesWithMetadata = myGames.map(gameName => gamesMetaDataByName[gameName]);
-  const myDates = Array.from(new Set(myPlays.map(gamePlay => gamePlay.date)));
-
-  const mostPlayedGames = dupeListToTopList(myGamesWithDupes.map(game => game.name));
 
   const topDesigners = dupeListToTopList(myGamesWithMetadata.flatMap(game => game.designers));
   const topArtists = dupeListToTopList(myGamesWithMetadata.flatMap(game => game.artists));
@@ -43,8 +34,6 @@ function App2023() {
   const gamesChronological = myGamesWithMetadata.sort((a, b) => a.yearPublished > b.yearPublished ? 1 : -1);
   const oldestGame = gamesChronological[0];
   const newestGame = gamesChronological.at(-1);
-
-  const winPercentage = `${(100 * ((playerWins[player.username] || 0) / myPlays.length)).toFixed(1)}%`;
 
   const longestGame = {
     name: "",
@@ -234,28 +223,5 @@ const Card = styled.section`
 const ImgCard = styled(Card)`
   padding: 0 !important;
 `;
-
-function countOccurrences(arr) {
-  return arr.reduce(function (a, b) {
-    a[b] = a[b] + 1 || 1
-    return a;
-  }, {});
-}
-
-function minutesToHM(d) {
-  const h = Math.floor(d / 60);
-  const m = Math.floor(d % 60);
-
-  const hDisplay = h > 0 ? h + (h === 1 ? " timme" : " timmar") : "";
-  const mDisplay = m > 0 ? (h > 0 ? " och " : "") + m + (m === 1 ? " minut" : " minuter") : "";
-  return hDisplay + mDisplay;
-}
-
-function dupeListToTopList(list, size = 5) {
-  return Object.entries(countOccurrences(list))
-    .map(([k, v]) => ({ thing: k, occurences: v }))
-    .sort((a, b) => a.occurences > b.occurences ? -1 : 1)
-    .slice(0, size);
-}
 
 export default App2023;
