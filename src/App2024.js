@@ -1,16 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Confetti from 'react-confetti';
 import { useBggForYear } from './Data';
 
-function App() {
+function App2024() {
+  const year = "2024";
   const {
     isLoading,
     plays,
-    // games,
-    // gamesMetaDataById,
     gamesMetaDataByName,
-  } = useBggForYear(2023)
+  } = useBggForYear(year);
+  useEffect(() => {
+    document.title = `Bräpped ${year}`;
+  }, [year]);
   const [player, setPlayer] = useState("");
 
   if (isLoading) {
@@ -58,7 +60,7 @@ function App() {
   return (
     <StyledApp>
       <Confetti style={{ position: "fixed" }} />
-      <Title>Bräpped 2023</Title>
+      <Title>Bräpped {year}</Title>
       <select
         style={{ fontSize: "2em" }}
         value={player.username}
@@ -256,4 +258,4 @@ function dupeListToTopList(list, size = 5) {
     .slice(0, size);
 }
 
-export default App;
+export default App2024;
