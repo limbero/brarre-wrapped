@@ -48,9 +48,20 @@ export function useBggForYear(year, player) {
     return {
       isLoading: true,
       plays: null,
+      date: null,
       games: null,
       gamesMetaDataById: null,
       gamesMetaDataByName: null,
+      playerWins: null,
+      playerScores: null,
+      uniquePlayers: null,
+      myPlays: null,
+      myGamesWithDupes: null,
+      myGames: null,
+      myGamesWithMetadata: null,
+      myDates: null,
+      mostPlayedGames: null,
+      winPercentage: null,
     };
   }
   const playsJson = Array.from(plays.querySelectorAll("play")).map((play) => {
@@ -66,7 +77,9 @@ export function useBggForYear(year, player) {
           name: pl.getAttribute("name"),
           username: pl.getAttribute("username"),
           win: pl.getAttribute("win") === "1" ? true : false,
-          score: pl.getAttribute("score"),
+          score: Number(pl.getAttribute("score")),
+          color: pl.getAttribute("color"),
+          new: pl.getAttribute("new") === "1" ? true : false,
         }))
         .map((pl) => {
           if (pl.username === "wohlfart") {
@@ -78,6 +91,10 @@ export function useBggForYear(year, player) {
             pl.name = "Erik Ekberg";
           } else if (pl.name === "Cesse") {
             pl.name = "Cecilia Apitzsch";
+          } else if (pl.name === "Meidi") {
+            pl.name = "Meidi Tõnisson-Bystam";
+          } else if (pl.name === "Fredrik Bystam") {
+            pl.name = "Fredrik Tõnisson-Bystam";
           }
           if (!pl.username) {
             pl.username = pl.name.replaceAll(" ", "");
@@ -86,6 +103,7 @@ export function useBggForYear(year, player) {
         }),
     };
   });
+  const dates = Array.from(new Set(playsJson.map(gamePlay => gamePlay.date)));
 
   const gamesJson = [];
   const gamesMetaDataById = {};
@@ -118,7 +136,9 @@ export function useBggForYear(year, player) {
   });
 
   const playersWithWins = playsJson.flatMap(gamePlay => gamePlay.players);
+  const playerAppearances = countOccurrences(playersWithWins.map(pl => pl.username));
   const playerWins = countOccurrences(playersWithWins.filter(pl => pl.win).map(pl => pl.username));
+  const playerScores = sumOccurrences(playersWithWins);
   const uniquePlayers = Array.from(new Set(playersWithWins.map(pl => {
     return JSON.stringify({
       name: pl.name,
@@ -140,10 +160,13 @@ export function useBggForYear(year, player) {
   return {
     isLoading: false,
     plays: playsJson,
+    dates,
     games: gamesJson,
     gamesMetaDataById,
     gamesMetaDataByName,
     playerWins,
+    playerScores,
+    playerAppearances,
     uniquePlayers,
     myPlays,
     myGamesWithDupes,
@@ -172,6 +195,13 @@ function chunk(arr, chunkSize) {
 function countOccurrences(arr) {
   return arr.reduce(function (a, b) {
     a[b] = a[b] + 1 || 1
+    return a;
+  }, {});
+}
+
+function sumOccurrences(arr) {
+  return arr.reduce(function (a, b) {
+    a[b.name] = a[b.name] + b.score || 0
     return a;
   }, {});
 }
