@@ -375,7 +375,7 @@ const StyledApp = styled.div`
   font-family: sans-serif;
   text-align: center;
 
-  padding: 50px;
+  padding: 50px 0;
   background-color: #222;
   min-height: 100vh;
 `;
@@ -400,6 +400,8 @@ const Card = styled.section`
   background-color: #fff;
   text-align: left;
   font-size: 1.5em;
+
+  overflow-x: scroll;
 
   & :first-child {
     margin-top: 0;
